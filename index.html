@@ -93,6 +93,13 @@
             margin-bottom: 20px;
         }
 
+        .form-help {
+            color: var(--hpe-text-muted);
+            font-size: 12px;
+            line-height: 1.5;
+            margin-top: 6px;
+        }
+
         .overlay-group {
             padding: 12px;
             border: 1px solid var(--hpe-border);
@@ -370,7 +377,7 @@
             >
         </div>
         <h1>Mist Mesh Calculator</h1>
-        <p class="subtitle">Calculate mesh deployment dimensions and capacity constraints in a HPE Mist managed SSR network.</p>
+        <p class="subtitle">Calculate mesh deployment dimensions and capacity constraints in a Mist managed SSR network.</p>
 
         <div class="disclaimer">
             <strong>Disclaimer:</strong> This tool is experimental and informational only. It is intended to explain how meshes in Mist are constructed and how they consume resources on an SSR device. Peer and peer path sizing data is based on SSR 7.1.3 performance testing. This tool must not be used for real deployment sizing. Educational use only.
@@ -394,11 +401,13 @@
 
             <div class="form-group">
                 <label for="numNodes">Number of SSR Nodes in Mesh</label>
+                <div class="form-help">SSR nodes in this case refer to a single router, standalone or HA.</div>
                 <input type="number" id="numNodes" min="1" value="10" placeholder="Enter number of nodes">
             </div>
 
             <div class="form-group">
-                <label for="overlayCount">Number of Mesh Overlays</label>
+                <label for="overlayCount">Number of Mesh Overlay Endpoint Types</label>
+                <div class="form-help">SSR WAN interfaces become endpoints in Mist overlays, and endpoints with the same name create peer paths to one another. This tool provides Broadband, MPLS, and DIA as example endpoint names.</div>
                 <select id="overlayCount">
                     <option value="1" selected>1 (Broadband)</option>
                     <option value="2">2 (Broadband + MPLS)</option>
@@ -407,7 +416,7 @@
             </div>
 
             <div class="form-group">
-                <label>WAN Interfaces per Node by Overlay</label>
+                <label>WAN Interfaces per SSR in each Named Endpoint Type</label>
 
                 <div class="overlay-group" id="overlayBroadband">
                     <div class="overlay-title">Broadband</div>
