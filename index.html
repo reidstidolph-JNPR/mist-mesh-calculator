@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mist Mesh Calculator</title>
+    <style>
+        :root {
+            --hpe-green: #00B388;
+            --hpe-green-dark: #009A72;
+            --hpe-ink: #111111;
+            --hpe-text: #2E2E2E;
+            --hpe-text-muted: #5F676A;
+            --hpe-border: #D9DEE1;
+            --hpe-surface: #FFFFFF;
+            --hpe-surface-soft: #F4F7F8;
+            --hpe-focus: rgba(0, 179, 136, 0.2);
+            --hpe-warning: #B36B00;
+            --hpe-error: #C9190B;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: radial-gradient(circle at top left, #0D0D0D 0%, var(--hpe-ink) 40%, #1A1A1A 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--hpe-surface);
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            border-top: 6px solid var(--hpe-green);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .hpe-logo {
+            width: 110px;
+            height: auto;
+            display: block;
+            flex-shrink: 0;
+        }
+
+        h1 {
+            color: var(--hpe-ink);
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: var(--hpe-text-muted);
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: var(--hpe-text);
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--hpe-border);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--hpe-green);
+            box-shadow: 0 0 0 3px var(--hpe-focus);
+        }
+
+        input[type="number"] {
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+
+        .results-section {
+            background: var(--hpe-surface-soft);
+            border-radius: 8px;
+            padding: 25px;
+            margin-top: 30px;
+            border-left: 4px solid var(--hpe-green);
+        }
+
+        .results-section h2 {
+            color: var(--hpe-ink);
+            font-size: 18px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .results-section h2::before {
+            content: "📊";
+            margin-right: 10px;
+        }
+
+        .result-item {
+            margin-bottom: 20px;
+        }
+
+        .result-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .result-label {
+            color: var(--hpe-text-muted);
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .result-value {
+            color: var(--hpe-ink);
+            font-size: 24px;
+            font-weight: 700;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+
+        .result-value.warning {
+            color: var(--hpe-warning);
+        }
+
+        .result-value.maximum {
+            color: var(--hpe-green-dark);
+        }
+
+        .result-value.error {
+            color: var(--hpe-error);
+        }
+
+        .breakdown {
+            background: var(--hpe-surface);
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 12px;
+            color: var(--hpe-text-muted);
+            border: 1px solid var(--hpe-border);
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+
+        .breakdown-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .breakdown-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .breakdown-label {
+            color: #768085;
+        }
+
+        .breakdown-value {
+            color: var(--hpe-text);
+            font-weight: 600;
+        }
+
+        .device-specs {
+            background: var(--hpe-surface);
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 10px;
+            font-size: 12px;
+            border: 1px solid var(--hpe-border);
+        }
+
+        .specs-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            color: var(--hpe-text-muted);
+        }
+
+        .specs-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .specs-label {
+            color: #768085;
+        }
+
+        .specs-value {
+            color: var(--hpe-text);
+            font-weight: 600;
+        }
+
+        .section-divider {
+            height: 1px;
+            background: var(--hpe-border);
+            margin: 20px 0;
+        }
+
+        .info-box {
+            background: #EAF7F3;
+            border-left: 4px solid var(--hpe-green);
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #0B5F49;
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+
+            .brand {
+                margin-bottom: 10px;
+            }
+
+            .hpe-logo {
+                width: 90px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .result-value {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="brand" aria-label="HPE logo">
+            <img
+                class="hpe-logo"
+                src="assets/hpe-logo.png"
+                alt="HPE"
+            >
+        </div>
+        <h1>Mist Mesh Calculator</h1>
+        <p class="subtitle">Calculate mesh deployment dimensions and capacity constraints in a HPE Mist managed SSR network.</p>
+
+        <div class="info-box">
+            <strong>How it works:</strong>
+            Select a device type, enter the number of nodes and WAN interfaces per node, and the calculator will determine mesh capacity constraints.
+        </div>
+
+        <div class="input-section">
+            <div class="form-group">
+                <label for="deviceType">Device Type</label>
+                <select id="deviceType">
+                    <option value="">-- Select a device --</option>
+                    <option value="SSR400">SSR400</option>
+                    <option value="SSR440">SSR440</option>
+                    <option value="SSR120">SSR120</option>
+                    <option value="SSR130">SSR130</option>
+                    <option value="SSR1200">SSR1200</option>
+                    <option value="SSR1300">SSR1300</option>
+                    <option value="SSR1400">SSR1400</option>
+                    <option value="SSR1500">SSR1500</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="numNodes">Number of SSR Nodes in Mesh</label>
+                <input type="number" id="numNodes" min="1" value="10" placeholder="Enter number of nodes">
+            </div>
+
+            <div class="form-group">
+                <label for="wanInterfaces">WAN Interfaces per Node</label>
+                <input type="number" id="wanInterfaces" min="1" value="1" placeholder="Enter number of WAN interfaces">
+            </div>
+        </div>
+
+        <div class="results-section" id="resultsSection" style="display: none;">
+            <h2>Analysis Results</h2>
+
+            <div class="result-item">
+                <div class="result-label">Device Type & Configuration</div>
+                <div class="device-specs">
+                    <div class="specs-row">
+                        <span class="specs-label">Selected Device:</span>
+                        <span class="specs-value" id="selectedDevice">-</span>
+                    </div>
+                    <div class="specs-row">
+                        <span class="specs-label">Max Peers per Node:</span>
+                        <span class="specs-value" id="maxPeers">-</span>
+                    </div>
+                    <div class="specs-row">
+                        <span class="specs-label">Max Peer Paths per Node:</span>
+                        <span class="specs-value" id="maxPeerPaths">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <div class="result-item">
+                <div class="result-label">Current Configuration Usage</div>
+                <div class="breakdown">
+                    <div class="breakdown-row">
+                        <span class="breakdown-label">Nodes in Mesh:</span>
+                        <span class="breakdown-value" id="configNodes">-</span>
+                    </div>
+                    <div class="breakdown-row">
+                        <span class="breakdown-label">WAN Interfaces per Node:</span>
+                        <span class="breakdown-value" id="configWAN">-</span>
+                    </div>
+                    <div class="breakdown-row">
+                        <span class="breakdown-label">Peers per Node (n-1):</span>
+                        <span class="breakdown-value" id="peersPerNode">-</span>
+                    </div>
+                    <div class="breakdown-row">
+                        <span class="breakdown-label">Peer Paths per Node:</span>
+                        <span class="breakdown-value" id="peerPathsPerNode">-</span>
+                    </div>
+                    <div class="breakdown-row">
+                        <span class="breakdown-label">Utilization (Peers):</span>
+                        <span class="breakdown-value" id="peersUtilization">-</span>
+                    </div>
+                    <div class="breakdown-row">
+                        <span class="breakdown-label">Utilization (Peer Paths):</span>
+                        <span class="breakdown-value" id="pathsUtilization">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <div class="result-item">
+                <div class="result-label">⚠️ Warning Threshold (80% Capacity)</div>
+                <div class="result-value warning" id="warningSize">-</div>
+                <div class="breakdown">
+                    <div class="breakdown-row">
+                        <span class="breakdown-label">Limiting Factor:</span>
+                        <span class="breakdown-value" id="warningLimiter">-</span>
+                    </div>
+                    <div class="breakdown-row">
+                        <span class="breakdown-label">At this size, nodes reach:</span>
+                        <span class="breakdown-value" id="warningCapacity">80%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-item">
+                <div class="result-label">🔴 Maximum Mesh Size (100% Capacity)</div>
+                <div class="result-value maximum" id="maximumSize">-</div>
+                <div class="breakdown">
+                    <div class="breakdown-row">
+                        <span class="breakdown-label">Limiting Factor:</span>
+                        <span class="breakdown-value" id="maximumLimiter">-</span>
+                    </div>
+                    <div class="breakdown-row">
+                        <span class="breakdown-label">At this size, nodes reach:</span>
+                        <span class="breakdown-value" id="maximumCapacity">100%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-section" id="errorSection" style="display: none; border-left-color: var(--hpe-error);">
+            <h2 style="color: var(--hpe-error);">⚠️ Configuration Error</h2>
+            <div class="result-value error" id="errorMessage" style="font-size: 16px; margin-top: 10px;">-</div>
+        </div>
+    </div>
+
+    <script>
+        // Device specifications
+        const devices = {
+            SSR400: { peerPaths: 100, peers: 100 },
+            SSR440: { peerPaths: 250, peers: 135 },
+            SSR120: { peerPaths: 120, peers: 260 },
+            SSR130: { peerPaths: 440, peers: 460 },
+            SSR1200: { peerPaths: 3240, peers: 1560 },
+            SSR1300: { peerPaths: 5100, peers: 1610 },
+            SSR1400: { peerPaths: 5180, peers: 2300 },
+            SSR1500: { peerPaths: 15120, peers: 2400 }
+        };
+
+        // Get DOM elements
+        const deviceTypeSelect = document.getElementById('deviceType');
+        const numNodesInput = document.getElementById('numNodes');
+        const wanInterfacesInput = document.getElementById('wanInterfaces');
+        const resultsSection = document.getElementById('resultsSection');
+        const errorSection = document.getElementById('errorSection');
+
+        // Add event listeners
+        deviceTypeSelect.addEventListener('change', calculate);
+        numNodesInput.addEventListener('input', calculate);
+        wanInterfacesInput.addEventListener('input', calculate);
+
+        function calculate() {
+            const deviceType = deviceTypeSelect.value;
+            const numNodes = parseInt(numNodesInput.value) || 0;
+            const wanInterfaces = parseInt(wanInterfacesInput.value) || 0;
+
+            // Hide both sections initially
+            resultsSection.style.display = 'none';
+            errorSection.style.display = 'none';
+
+            // Validate inputs
+            if (!deviceType) {
+                showError('Please select a device type');
+                return;
+            }
+
+            if (numNodes < 1) {
+                showError('Number of nodes must be at least 1');
+                return;
+            }
+
+            if (wanInterfaces < 1) {
+                showError('Number of WAN interfaces must be at least 1');
+                return;
+            }
+
+            // Get device specs
+            const specs = devices[deviceType];
+
+            // Calculate current configuration
+            const peersPerNode = numNodes - 1;
+            const peerPathsPerNode = wanInterfaces * wanInterfaces * (numNodes - 1);
+
+            // Check if current configuration exceeds limits
+            if (peersPerNode > specs.peers || peerPathsPerNode > specs.peerPaths) {
+                showError(`Current configuration exceeds device limits. Peers per node: ${peersPerNode}/${specs.peers}, Peer paths per node: ${peerPathsPerNode}/${specs.peerPaths}`);
+                return;
+            }
+
+            // Calculate warning size (80%)
+            const warningPeerLimit = Math.floor((specs.peers * 0.8));
+            const warningPathLimit = Math.floor((specs.peerPaths * 0.8));
+
+            // Warning size is limited by peers first
+            let warningSize = warningPeerLimit + 1; // n-1 = peers, so n = peers + 1
+            let warningLimiter = 'Peers';
+
+            // If paths are more limiting at 80%
+            const maxNodesFromPaths80 = Math.floor(warningPathLimit / (wanInterfaces * wanInterfaces)) + 1;
+            if (maxNodesFromPaths80 < warningSize) {
+                warningSize = maxNodesFromPaths80;
+                warningLimiter = 'Peer Paths';
+            }
+
+            // Calculate maximum mesh size (100%)
+            let maximumSize = specs.peers + 1; // n-1 = peers, so n = peers + 1
+            let maximumLimiter = 'Peers';
+
+            // If paths are more limiting at 100%
+            const maxNodesFromPaths100 = Math.floor(specs.peerPaths / (wanInterfaces * wanInterfaces)) + 1;
+            if (maxNodesFromPaths100 < maximumSize) {
+                maximumSize = maxNodesFromPaths100;
+                maximumLimiter = 'Peer Paths';
+            }
+
+            // Update results
+            updateResults(deviceType, specs, numNodes, wanInterfaces, peersPerNode, peerPathsPerNode, warningSize, warningLimiter, maximumSize, maximumLimiter);
+
+            resultsSection.style.display = 'block';
+        }
+
+        function updateResults(deviceType, specs, numNodes, wanInterfaces, peersPerNode, peerPathsPerNode, warningSize, warningLimiter, maximumSize, maximumLimiter) {
+            // Device info
+            document.getElementById('selectedDevice').textContent = deviceType;
+            document.getElementById('maxPeers').textContent = specs.peers.toLocaleString();
+            document.getElementById('maxPeerPaths').textContent = specs.peerPaths.toLocaleString();
+
+            // Current configuration
+            document.getElementById('configNodes').textContent = numNodes;
+            document.getElementById('configWAN').textContent = wanInterfaces;
+            document.getElementById('peersPerNode').textContent = peersPerNode;
+            document.getElementById('peerPathsPerNode').textContent = peerPathsPerNode.toLocaleString();
+
+            // Utilization percentages
+            const peersUtilization = ((peersPerNode / specs.peers) * 100).toFixed(1);
+            const pathsUtilization = ((peerPathsPerNode / specs.peerPaths) * 100).toFixed(1);
+            document.getElementById('peersUtilization').textContent = `${peersUtilization}%`;
+            document.getElementById('pathsUtilization').textContent = `${pathsUtilization}%`;
+
+            // Warning threshold
+            document.getElementById('warningSize').textContent = `${warningSize} nodes`;
+            document.getElementById('warningLimiter').textContent = warningLimiter;
+
+            // Maximum mesh size
+            document.getElementById('maximumSize').textContent = `${maximumSize} nodes`;
+            document.getElementById('maximumLimiter').textContent = maximumLimiter;
+        }
+
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            errorSection.style.display = 'block';
+        }
+
+        // Initialize with first device if page loads
+        window.addEventListener('load', () => {
+            // Select first device by default
+            if (deviceTypeSelect.value === '') {
+                deviceTypeSelect.value = 'SSR130';
+                calculate();
+            }
+        });
+    </script>
+</body>
+</html>
